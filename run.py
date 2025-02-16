@@ -1,5 +1,4 @@
-# run.py
-from app import create_app
+from app import create_app  # Import from app package
 
 app = create_app()
 
