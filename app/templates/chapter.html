@@ -1,0 +1,45 @@
+{%extends "base.html"%} {%block content%}
+<h1>{{ chapter.name }}</h1>
+<p>{{ chapter.description }}</p>
+
+{% if current_user.role == 'teacher' %}
+<a
+  href="{{ url_for('main.edit_chapter', chapter_id=chapter.id) }}"
+  class="btn btn-primary"
+  >Edit chapter</a
+>
+<a
+  href="{{ url_for('main.delete_chapter', chapter_id=chapter.id) }}"
+  class="btn btn-danger"
+  >Delete chapter</a
+>
+<a
+  href="{{ url_for('main.add_chapter', chapter_id=chapter.id) }}"
+  class="btn btn-primary"
+  >Add Chapter</a
+>
+{% endif %} {% for chapter in chapters %}
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ chapter.name }}</h5>
+    <p class="card-text">{{ chapter.description }}</p>
+    <a
+      href="{{ url_for('main.chapter', chapter_id=chapter.id) }}"
+      class="btn btn-primary"
+      >View Chapter</a
+    >
+    {% if current_user.role == 'teacher' %}
+    <a
+      href="{{ url_for('main.edit_chapter', chapter_id=chapter.id) }}"
+      class="btn btn-primary"
+      >Edit Chapter</a
+    >
+    <a
+      href="{{ url_for('main.delete_chapter', chapter_id=chapter.id) }}"
+      class="btn btn-danger"
+      >Delete Chapter</a
+    >
+    {% endif %}
+  </div>
+</div>
+{%endblock%}

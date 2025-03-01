@@ -74,6 +74,10 @@ def add_subject():
 @login_required
 def delete_subject(subject_id):
     subject = Subject.query.get(subject_id)
+    chapters=  Chapter.query.filter_by(subjectId=subject_id).all()
+    for chapter in chapters:
+        db.session.delete(chapter)
+        db.session.commit()
     db.session.delete(subject)
     db.session.commit()
     flash(f'Subject {subject.name} deleted successfully!', 'success')
@@ -95,6 +99,12 @@ def edit_subject(subject_id):
         form.description.data = subject.description
     return render_template("edit_subject.html", form=form,subject=subject)
 
+@main.route('/subjects/<int:subject_id>')
+def subject(subject_id):
+    chapters = Chapter.query.filter_by(subjectId=subject_id).all()
+    subject = Subject.query.filter_by(id=subject_id).first()
+    return render_template("subject.html",chapters=chapters,user_role=current_user.role,subject=subject)
+
 #chapter routes
 @main.route('/add_chapter/<int:subject_id>', methods=['GET', 'POST'])
 @login_required
@@ -105,8 +115,8 @@ def add_chapter(subject_id):
         db.session.add(chapter)
         db.session.commit()
         flash(f'Chapter {form.name.data} added successfully!', 'success')
-        return redirect(url_for('main.add_chapter'))
-    return render_template("add_chapter.html", form=form)
+        return redirect(url_for('main.subject',subject_id=subject_id))
+    return render_template("add_chapter.html", form=form,subject_id=subject_id)
 
 @main.route('/delete_chapter/<int:chapter_id>', methods=['GET', 'POST'])
 @login_required
@@ -115,7 +125,7 @@ def delete_chapter(chapter_id):
     db.session.delete(chapter)
     db.session.commit()
     flash(f'Chapter {chapter.name} deleted successfully!', 'success')
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.subject',subject_id=chapter.subjectId))
 
 @main.route('/edit_chapter/<int:chapter_id>', methods=['GET', 'POST'])
 @login_required
@@ -127,12 +137,17 @@ def edit_chapter(chapter_id):
         chapter.description = form.description.data
         db.session.commit()
         flash(f'Chapter {form.name.data} edited successfully!', 'success')
-        return redirect(url_for('main.dashboard'))
+        return redirect(url_for('main.subject',subject_id=chapter.subjectId))
     elif request.method == 'GET':
         form.name.data = chapter.name
         form.description.data = chapter.description
-    return render_template("edit_chapter.html", form=form)
+    return render_template("edit_chapter.html", form=form,chapter=chapter)
 
+@main.route('/chapters/<int:chapter_id>')
+def chapter(chapter_id):
+    quizzes = Quiz.query.filter_by(chapter_id=chapter_id).all()
+    chapter = Chapter.query.filter_by(id=chapter_id).first()
+    return render_template("chapter.html",quizzes=quizzes,user_role=current_user.role,chapter=chapter)
 
 @main.route('/add_quiz/<int:chapter_id>', methods=['GET', 'POST'])
 @login_required
@@ -158,11 +173,7 @@ def add_question(quiz_id):
         return redirect(url_for('main.add_question'))
     return render_template("add_question.html", form=form)
 
-@main.route('/subjects/<int:subject_id>')
-def subject(subject_id):
-    chapters = Chapter.query.filter_by(subjectId=subject_id).all()
-    subject = Subject.query.filter_by(id=subject_id).first()
-    return render_template("subject.html",chapters=chapters,user_role=current_user.role,subject=subject)
+
 
 @main.route('/logout')
 def logout():

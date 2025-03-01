@@ -1,6 +1,7 @@
 from . import db
 from flask_login import UserMixin
 from datetime import datetime
+from sqlalchemy import UniqueConstraint
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -9,9 +10,9 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100), nullable=False)
     fullName = db.Column(db.String(100), nullable=False)
     qualification = db.Column(db.String(100), nullable=False)
-    date_of_birth = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD format
-    role = db.Column(db.String(10), nullable=False)  # Limited to 'student' or 'teacher'
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Track account creation
+    date_of_birth = db.Column(db.String(10), nullable=False)
+    role = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.role}')"
@@ -23,9 +24,10 @@ class Subject(db.Model):
 
 class Chapter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name= db.Column(db.String(100), unique=True)
+    name= db.Column(db.String(100))
     description = db.Column(db.String(100))
     subjectId = db.Column(db.Integer, db.ForeignKey('subject.id'),nullable=False)
+    __table_args__ = (UniqueConstraint('name', 'subjectId', name='uq_chapter_subject'),)
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
