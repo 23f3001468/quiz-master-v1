@@ -1,0 +1,45 @@
+{% extends "base.html" %} {% block content %}
+<h1>{{ subject.name }}</h1>
+<p>{{ subject.description }}</p>
+
+{% if current_user.role == 'teacher' %}
+<a
+  href="{{ url_for('main.edit_subject', subject_id=subject.id) }}"
+  class="btn btn-primary"
+  >Edit Subject</a
+>
+<a
+  href="{{ url_for('main.delete_subject', subject_id=subject.id) }}"
+  class="btn btn-danger"
+  >Delete Subject</a
+>
+<a
+  href="{{ url_for('main.add_chapter', subject_id=subject.id) }}"
+  class="btn btn-primary"
+  >Add Chapter</a
+>
+{% endif %} {% for chapter in chapters %}
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ chapter.name }}</h5>
+    <p class="card-text">{{ chapter.description }}</p>
+    <a
+      href="{{ url_for('main.chapter', chapter_id=chapter.id) }}"
+      class="btn btn-primary"
+      >View Chapter</a
+    >
+    {% if current_user.role == 'teacher' %}
+    <a
+      href="{{ url_for('main.edit_chapter', chapter_id=chapter.id) }}"
+      class="btn btn-primary"
+      >Edit Chapter</a
+    >
+    <a
+      href="{{ url_for('main.delete_chapter', chapter_id=chapter.id) }}"
+      class="btn btn-danger"
+      >Delete Chapter</a
+    >
+    {% endif %}
+  </div>
+</div>
+{% endfor %} {% endblock %}
