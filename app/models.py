@@ -4,13 +4,17 @@ from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    fullName = db.Column(db.String(100))
-    qualification = db.Column(db.String(100))
-    date_of_birth = db.Column(db.DateTime, default=datetime.utcnow)
-    role = db.Column(db.String(100), default='student')
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+    fullName = db.Column(db.String(100), nullable=False)
+    qualification = db.Column(db.String(100), nullable=False)
+    date_of_birth = db.Column(db.String(10), nullable=False)  # YYYY-MM-DD format
+    role = db.Column(db.String(10), nullable=False)  # Limited to 'student' or 'teacher'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Track account creation
+
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}', '{self.role}')"
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)

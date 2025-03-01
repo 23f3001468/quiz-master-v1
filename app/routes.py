@@ -1,8 +1,8 @@
 # app/routes.py
 from flask import Blueprint, render_template, redirect, url_for, flash,session, request
 from . import db, bcrypt
-from .models import User
-from .forms import LoginForm, RegistrationForm
+from .models import User, Subject, Chapter, Quiz, Question
+from .forms import LoginForm, RegistrationForm, SubjectForm, ChapterForm, QuizForm, QuestionForm
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_bcrypt import generate_password_hash
 from datetime import datetime
@@ -27,11 +27,7 @@ def login():
 
             # Debugging role value
             print(f"User role type: {type(current_user.role)}, Value: {current_user.role}")
-
-            if current_user.role.strip().lower() == 'student':
-                return redirect(url_for('main.student_dashboard'))
-            elif current_user.role.strip().lower() == 'teacher':
-                return redirect(url_for('main.teacher_dashboard'))
+            return redirect(url_for('main.dashboard'))
         else:
             print("Not logged in")
             flash("Login Unsuccessful. Check email and password.", 'danger')
@@ -43,9 +39,10 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
+        print(f"Selected Role: {form.role.data}")
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         form.date_of_birth.data = datetime.strptime(form.date_of_birth.data, '%d/%m/%Y').date()
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password, fullName=form.fullName.data, qualification=form.qualification.data, date_of_birth=form.date_of_birth.data)
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, fullName=form.fullName.data, qualification=form.qualification.data, date_of_birth=form.date_of_birth.data,role=form.role.data)
         db.session.add(user)
         db.session.commit()
         flash(f'Account created for {form.username.data}!', 'success')
@@ -54,15 +51,64 @@ def register():
 
 
 #create a dashboard route
-@main.route('/student_dashboard')
+@main.route('/dashboard')
 @login_required
-def student_dashboard():
-    return render_template("student_dashboard.html")
+def dashboard():
+    subjects = Subject.query.all()
+    return render_template("dashboard.html",subjects=subjects, user_role=current_user.role)
 
-@main.route('/teacher_dashboard')
+@main.route('/add_subject', methods=['GET', 'POST'])
 @login_required
-def teacher_dashboard():
-    return render_template("teacher_dashboard.html")
+def add_subject():
+    form = SubjectForm()
+    if form.validate_on_submit():
+        subject = Subject(name=form.name.data, description=form.description.data)
+        db.session.add(subject)
+        db.session.commit()
+        flash(f'Subject {form.name.data} added successfully!', 'success')
+        return redirect(url_for('main.add_subject'))
+    return render_template("add_subject.html", form=form)
+
+@main.route('/add_chapter/<int:subject_id>', methods=['GET', 'POST'])
+@login_required
+def add_chapter(subject_id):
+    form = ChapterForm()
+    if form.validate_on_submit():
+        chapter = Chapter(name=form.name.data, description=form.description.data, subjectId=subject_id)
+        db.session.add(chapter)
+        db.session.commit()
+        flash(f'Chapter {form.name.data} added successfully!', 'success')
+        return redirect(url_for('main.add_chapter'))
+    return render_template("add_chapter.html", form=form)
+
+@main.route('/add_quiz/<int:chapter_id>', methods=['GET', 'POST'])
+@login_required
+def add_quiz(chapter_id):
+    form = QuizForm()
+    if form.validate_on_submit():
+        quiz = Quiz(chapter_id=chapter_id, date_of_quiz=form.date_of_quiz.data, duration=form.duration.data, remarks=form.remarks.data)
+        db.session.add(quiz)
+        db.session.commit()
+        flash(f'Quiz added successfully!', 'success')
+        return redirect(url_for('main.add_quiz'))
+    return render_template("add_quiz.html", form=form)
+
+@main.route('/add_question/<int:quiz_id>', methods=['GET', 'POST'])
+@login_required
+def add_question(quiz_id):
+    form = QuestionForm()
+    if form.validate_on_submit():
+        question = Question(quiz_id=quiz_id, question_statement=form.question_statement.data, option1=form.option1.data, option2=form.option2.data, option3=form.option3.data, option4=form.option4.data, correct_option=form.correct_option.data)
+        db.session.add(question)
+        db.session.commit()
+        flash(f'Question added successfully!', 'success')
+        return redirect(url_for('main.add_question'))
+    return render_template("add_question.html", form=form)
+
+@main.route('/subjects/<int:subject_id>')
+def subject(subject_id):
+    chapters = Chapter.query.filter_by(subjectId=subject_id).all()
+    return render_template("subject.html", chapters=chapters,user_role=current_user.role)
 
 @main.route('/logout')
 def logout():
