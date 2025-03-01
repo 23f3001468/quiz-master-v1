@@ -42,6 +42,10 @@
       password") }}
     </div>
     <div class="form-group mb-3">
+      {{ form.role.label(class="form-label") }} {{
+      form.role(class="form-control", placeholder="Enter your role") }}
+    </div>
+    <div class="form-group mb-3">
       {{ form.submit(class="btn btn-primary") }}
     </div>
   </form>

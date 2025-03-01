@@ -10,6 +10,7 @@ class User(UserMixin, db.Model):
     fullName = db.Column(db.String(100))
     qualification = db.Column(db.String(100))
     date_of_birth = db.Column(db.DateTime, default=datetime.utcnow)
+    role = db.Column(db.String(100), default='student')
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
