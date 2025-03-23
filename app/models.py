@@ -9,7 +9,6 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     fullName = db.Column(db.String(100), nullable=False)
-    qualification = db.Column(db.String(100), nullable=False)
     date_of_birth = db.Column(db.String(10), nullable=False)
     role = db.Column(db.String(10), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -31,9 +30,8 @@ class Chapter(db.Model):
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name= db.Column(db.String(100), nullable=False)
     chapter_id = db.Column(db.Integer, db.ForeignKey('chapter.id'), nullable=False)
-    date_of_quiz = db.Column(db.DateTime, default=datetime.utcnow, nullable=False) 
-    duration = db.Column(db.String(5), nullable=False)
     remarks = db.Column(db.String(255), nullable=True) 
 
 class Question(db.Model):

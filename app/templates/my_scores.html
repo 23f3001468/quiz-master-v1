@@ -1,0 +1,28 @@
+{% extends "base.html" %} {% block content %}
+<h2>My Quiz Attempts & Scores</h2>
+
+{% if scores %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Quiz Name</th>
+      <th>Score</th>
+      <th>Date & Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for quiz in scores %}
+    <tr>
+      <td>{{ quiz.name }}</td>
+      <td>{{ quiz.total_scored }}</td>
+      <td>{{ quiz.time_stamp_of_attempt.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>You have not attempted any quizzes yet.</p>
+{% endif %}
+
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Home</a>
+{% endblock %}

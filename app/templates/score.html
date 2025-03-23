@@ -1,0 +1,15 @@
+{% extends "base.html" %} {% block content %}
+<h2>Quiz Completed!</h2>
+<p>Your Score: {{ score }} / {{ total }}</p>
+
+{% if correct_answers %}
+<h4>Correct Answers:</h4>
+<ul>
+  {% for item in correct_answers %}
+  <li>{{ item.question }} - Correct Answer: {{ item.correct_option }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Home</a>
+{% endblock %}

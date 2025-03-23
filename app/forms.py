@@ -10,12 +10,10 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
     username = StringField("Username", validators=[DataRequired(), Length(min=2, max=20)])
     fullName = StringField("Full Name", validators=[DataRequired()])
-    qualification = StringField("Qualification", validators=[DataRequired()])
     date_of_birth= StringField("Date of Birth", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired(), Email()])
     password = PasswordField("Password", validators=[DataRequired()])
     confirm_password = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo('password')])
-    role = SelectField("Role", choices=[('student', 'Student'), ('teacher', 'Teacher')],validators=[DataRequired()], default='student')
     submit = SubmitField("Sign Up")
 
 class SubjectForm(FlaskForm):
@@ -29,13 +27,12 @@ class ChapterForm(FlaskForm):
     submit = SubmitField("Add Chapter")
 
 class QuizForm(FlaskForm):
-    date_of_quiz = StringField("Date of Quiz", validators=[DataRequired()])
-    duration = StringField("Duration", validators=[DataRequired()])
+    name= StringField("Quiz Name", validators=[DataRequired()])
     remarks = TextAreaField("Remarks")
     submit = SubmitField("Add Quiz")
 
 class QuestionForm(FlaskForm):
-    question = TextAreaField("Question", validators=[DataRequired()])
+    question_statement = TextAreaField("Question", validators=[DataRequired()])
     option1 = StringField("Option 1", validators=[DataRequired()])
     option2 = StringField("Option 2", validators=[DataRequired()])
     option3 = StringField("Option 3", validators=[DataRequired()])

@@ -1,0 +1,56 @@
+{% extends "base.html" %} {% block content %}
+<div class="container">
+  <h2 class="text-center mb-4">Add Question</h2>
+
+  <form
+    method="POST"
+    action="{{ url_for('main.add_question', quiz_id=quiz.id) }}"
+    class="mx-auto"
+    style="max-width: 600px"
+  >
+    {{ form.hidden_tag() }}
+
+    <div class="form-group mb-3">
+      {{ form.question_statement.label(class="form-label") }} {{
+      form.question_statement(class="form-control", placeholder="Enter the question") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.option1.label(class="form-label") }} {{
+      form.option1(class="form-control", placeholder="Enter Option 1") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.option2.label(class="form-label") }} {{
+      form.option2(class="form-control", placeholder="Enter Option 2") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.option3.label(class="form-label") }} {{
+      form.option3(class="form-control", placeholder="Enter Option 3") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.option4.label(class="form-label") }} {{
+      form.option4(class="form-control", placeholder="Enter Option 4") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.correct_option.label(class="form-label") }} {{
+      form.correct_option(class="form-select") }}
+    </div>
+
+    <div class="form-group mb-3 text-center">
+      {{ form.submit(class="btn btn-success") }}
+    </div>
+  </form>
+
+  <div class="text-center mt-3">
+    <a
+      href="{{ url_for('main.quiz', quiz_id=quiz.id) }}"
+      class="btn btn-secondary"
+      >Back to Quiz</a
+    >
+  </div>
+</div>
+{% endblock %}

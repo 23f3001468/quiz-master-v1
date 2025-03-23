@@ -2,7 +2,7 @@
 current_user.is_authenticated %}
 <h1>Dashboard</h1>
 <h3>Welcome, {{ current_user.username }}!</h3>
-{%if current_user.role=='teacher'%}
+{%if current_user.role=='admin'%}
 <a href="{{ url_for('main.add_subject') }}" class="btn btn-primary"
   >Add Subject</a
 >
@@ -16,7 +16,7 @@ current_user.is_authenticated %}
       class="btn btn-primary"
       >View Subject</a
     >
-    {%if current_user.role=='teacher'%}
+    {%if current_user.role=='admin'%}
     <a
       href="{{url_for('main.edit_subject', subject_id=subject.id)}}"
       class="btn btn-primary"

@@ -1,7 +1,7 @@
 # app/routes.py
 from flask import Blueprint, render_template, redirect, url_for, flash,session, request
 from . import db, bcrypt
-from .models import User, Subject, Chapter, Quiz, Question
+from .models import User, Subject, Chapter, Quiz, Question, Score
 from .forms import LoginForm, RegistrationForm, SubjectForm, ChapterForm, QuizForm, QuestionForm
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_bcrypt import generate_password_hash
@@ -39,10 +39,9 @@ def login():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        print(f"Selected Role: {form.role.data}")
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         form.date_of_birth.data = datetime.strptime(form.date_of_birth.data, '%d/%m/%Y').date()
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password, fullName=form.fullName.data, qualification=form.qualification.data, date_of_birth=form.date_of_birth.data,role=form.role.data)
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, fullName=form.fullName.data, date_of_birth=form.date_of_birth.data,role="user")
         db.session.add(user)
         db.session.commit()
         flash(f'Account created for {form.username.data}!', 'success')
@@ -147,31 +146,139 @@ def edit_chapter(chapter_id):
 def chapter(chapter_id):
     quizzes = Quiz.query.filter_by(chapter_id=chapter_id).all()
     chapter = Chapter.query.filter_by(id=chapter_id).first()
-    return render_template("chapter.html",quizzes=quizzes,user_role=current_user.role,chapter=chapter)
+    return render_template("chapter.html",quizzes=quizzes,user_role=current_user.role,chapter=chapter,subject_id=chapter.subjectId)
 
+#quiz routes
 @main.route('/add_quiz/<int:chapter_id>', methods=['GET', 'POST'])
 @login_required
 def add_quiz(chapter_id):
     form = QuizForm()
     if form.validate_on_submit():
-        quiz = Quiz(chapter_id=chapter_id, date_of_quiz=form.date_of_quiz.data, duration=form.duration.data, remarks=form.remarks.data)
+        quiz = Quiz(name=form.name.data,chapter_id=chapter_id, remarks=form.remarks.data)
         db.session.add(quiz)
         db.session.commit()
         flash(f'Quiz added successfully!', 'success')
-        return redirect(url_for('main.add_quiz'))
-    return render_template("add_quiz.html", form=form)
+        return redirect(url_for('main.chapter', chapter_id=chapter_id))
+    return render_template("add_quiz.html", form=form,chapter_id=chapter_id)
 
+@main.route('/edit_quiz/<int:quiz_id>',methods=['GET','POST'])
+@login_required
+def edit_quiz(quiz_id):
+    form=QuizForm()
+    quiz=Quiz.query.get(quiz_id)
+    if form.validate_on_submit():
+        quiz.name=form.name.data
+        quiz.remarks=form.remarks.data
+        db.session.commit()
+        flash(f'Quiz edited successfully!','success')
+        return redirect(url_for('main.chapter',chapter_id=quiz.chapter_id))
+    elif request.method=='GET':
+        form.name.data=quiz.name
+        form.remarks.data=quiz.remarks
+    return render_template("edit_quiz.html",form=form,quiz=quiz)
+
+@main.route('/delete_quiz/<int:quiz_id>', methods=['GET', 'POST'])
+@login_required
+def delete_quiz(quiz_id):
+    quiz = Quiz.query.get(quiz_id)
+    db.session.delete(quiz)
+    db.session.commit()
+    flash(f'Quiz deleted successfully!', 'success')
+    return redirect(url_for('main.chapter',chapter_id=quiz.chapter_id))
+
+@main.route('/quiz/<int:quiz_id>')
+def quiz(quiz_id):
+    questions = Question.query.filter_by(quiz_id=quiz_id).all()
+    quiz = Quiz.query.filter_by(id=quiz_id).first()
+    return render_template("quiz.html",questions=questions,user_role=current_user.role,quiz=quiz)
+
+@main.route('/submit_quiz/<int:quiz_id>', methods=['POST'])
+@login_required
+def submit_quiz(quiz_id):
+    questions = Question.query.filter_by(quiz_id=quiz_id).all()
+    score = 0
+    total = len(questions)
+    correct_answers = []
+
+    for question in questions:
+        selected = request.form.get(f'answer_{question.id}')
+        if selected == question.correct_option:
+            score += 1
+        correct_answers.append({'question': question.question_statement, 'correct_option': getattr(question, f'option{question.correct_option}')})
+
+    new_score = Score(user_id=current_user.id, quiz_id=quiz_id, total_scored=score)
+    db.session.add(new_score)
+    db.session.commit()
+
+    return render_template('score.html', score=score, total=total, correct_answers=correct_answers)
+
+
+#question routes
 @main.route('/add_question/<int:quiz_id>', methods=['GET', 'POST'])
 @login_required
 def add_question(quiz_id):
+    if current_user.role != 'admin':
+        return "Unauthorized", 403
+
+    quiz = Quiz.query.get_or_404(quiz_id)
     form = QuestionForm()
+
     if form.validate_on_submit():
-        question = Question(quiz_id=quiz_id, question_statement=form.question_statement.data, option1=form.option1.data, option2=form.option2.data, option3=form.option3.data, option4=form.option4.data, correct_option=form.correct_option.data)
-        db.session.add(question)
+        new_question = Question(
+            quiz_id=quiz_id,
+            question_statement=form.question_statement.data,
+            option1=form.option1.data,
+            option2=form.option2.data,
+            option3=form.option3.data,
+            option4=form.option4.data,
+            correct_option=form.correct_option.data
+        )
+        db.session.add(new_question)
         db.session.commit()
-        flash(f'Question added successfully!', 'success')
-        return redirect(url_for('main.add_question'))
-    return render_template("add_question.html", form=form)
+        return redirect(url_for('main.quiz', quiz_id=quiz_id))
+
+    return render_template('add_question.html', form=form, quiz=quiz)
+
+@main.route('/edit_question/<int:question_id>', methods=['GET', 'POST'])
+@login_required
+def edit_question(question_id):
+    if current_user.role != 'admin':
+        return "Unauthorized", 403
+
+    question = Question.query.get_or_404(question_id)
+    form = QuestionForm(obj=question)
+
+    if form.validate_on_submit():
+        question.question_statement = form.question_statement.data
+        question.option1 = form.option1.data
+        question.option2 = form.option2.data
+        question.option3 = form.option3.data
+        question.option4 = form.option4.data
+        question.correct_option = form.correct_option.data
+        db.session.commit()
+        return redirect(url_for('main.quiz', quiz_id=question.quiz_id))
+
+    return render_template('edit_question.html', form=form, question=question)
+
+
+@main.route('/delete_question/<int:question_id>')
+@login_required
+def delete_question(question_id):
+    if current_user.role != 'admin':
+        return "Unauthorized", 403
+
+    question = Question.query.get_or_404(question_id)
+    quiz_id = question.quiz_id
+    db.session.delete(question)
+    db.session.commit()
+    return redirect(url_for('main.quiz', quiz_id=quiz_id))
+
+#score route
+@main.route('/my_scores')
+@login_required
+def my_scores():
+    scores = Score.query.filter_by(user_id=current_user.id).join(Quiz, Quiz.id == Score.quiz_id).add_columns(Quiz.name, Score.total_scored, Score.time_stamp_of_attempt).all()
+    return render_template('my_scores.html', scores=scores)
 
 
 

@@ -2,7 +2,7 @@
 <h1>{{ subject.name }}</h1>
 <p>{{ subject.description }}</p>
 
-{% if current_user.role == 'teacher' %}
+{% if current_user.role == 'admin' %}
 <a
   href="{{ url_for('main.edit_subject', subject_id=subject.id) }}"
   class="btn btn-primary"
@@ -28,7 +28,7 @@
       class="btn btn-primary"
       >View Chapter</a
     >
-    {% if current_user.role == 'teacher' %}
+    {% if current_user.role == 'admin' %}
     <a
       href="{{ url_for('main.edit_chapter', chapter_id=chapter.id) }}"
       class="btn btn-primary"

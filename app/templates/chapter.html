@@ -2,7 +2,7 @@
 <h1>{{ chapter.name }}</h1>
 <p>{{ chapter.description }}</p>
 
-{% if current_user.role == 'teacher' %}
+{% if current_user.role == 'admin' %}
 <a
   href="{{ url_for('main.edit_chapter', chapter_id=chapter.id) }}"
   class="btn btn-primary"
@@ -14,32 +14,41 @@
   >Delete chapter</a
 >
 <a
-  href="{{ url_for('main.add_chapter', chapter_id=chapter.id) }}"
+  href="{{ url_for('main.add_quiz', chapter_id=chapter.id) }}"
   class="btn btn-primary"
-  >Add Chapter</a
+  >Add Quiz</a
 >
-{% endif %} {% for chapter in chapters %}
+
+{% endif %} {% for quiz in quizzes %}
 <div class="card mt-3">
   <div class="card-body">
-    <h5 class="card-title">{{ chapter.name }}</h5>
-    <p class="card-text">{{ chapter.description }}</p>
+    <h5 class="card-title">{{ quiz.name }}</h5>
+    <p class="card-text">{{ quiz.description }}</p>
+
+    {% if current_user.role == 'admin' %}
     <a
-      href="{{ url_for('main.chapter', chapter_id=chapter.id) }}"
+      href="{{ url_for('main.quiz', quiz_id=quiz.id) }}"
       class="btn btn-primary"
-      >View Chapter</a
-    >
-    {% if current_user.role == 'teacher' %}
-    <a
-      href="{{ url_for('main.edit_chapter', chapter_id=chapter.id) }}"
-      class="btn btn-primary"
-      >Edit Chapter</a
+      >View Quiz</a
     >
     <a
-      href="{{ url_for('main.delete_chapter', chapter_id=chapter.id) }}"
+      href="{{ url_for('main.edit_quiz', quiz_id=quiz.id) }}"
+      class="btn btn-primary"
+      >Edit Quiz</a
+    >
+    <a
+      href="{{ url_for('main.delete_quiz', quiz_id=quiz.id) }}"
       class="btn btn-danger"
-      >Delete Chapter</a
+      >Delete QUiz</a
+    >
+    {% else %}
+    <a
+      href="{{ url_for('main.quiz', quiz_id=quiz.id) }}"
+      class="btn btn-primary"
+      >Attempt Quiz</a
     >
     {% endif %}
   </div>
+  {%endfor%}
 </div>
 {%endblock%}
