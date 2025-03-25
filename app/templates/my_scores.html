@@ -20,9 +20,44 @@
     {% endfor %}
   </tbody>
 </table>
+
+<!-- Chart Container -->
+<h3 class="mt-5">Score Chart</h3>
+<canvas id="scoreChart" width="400" height="200"></canvas>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('scoreChart').getContext('2d');
+  const scoreChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [{% for quiz in scores %}'{{ quiz.name }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+      datasets: [{
+        label: 'Scores',
+        data: [{% for quiz in scores %}{{ quiz.total_scored }}{% if not loop.last %}, {% endif %}{% endfor %}],
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
 {% else %}
 <p>You have not attempted any quizzes yet.</p>
 {% endif %}
 
-<a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Back to Home</a>
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-primary mt-4"
+  >Back to Home</a
+>
 {% endblock %}
