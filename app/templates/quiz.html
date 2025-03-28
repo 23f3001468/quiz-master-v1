@@ -18,6 +18,11 @@
   class="btn btn-primary"
   >Add Question</a
 >
+<a
+  href="{{ url_for('main.chapter',chapter_id=quiz.chapter_id) }}"
+  class="btn btn-secondary"
+  >Back to Chapter</a
+>
 {% endif %}
 
 <form method="POST" action="{{ url_for('main.submit_quiz', quiz_id=quiz.id) }}">

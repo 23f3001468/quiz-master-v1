@@ -18,7 +18,11 @@
   class="btn btn-primary"
   >Add Chapter</a
 >
-{% endif %} {% for chapter in chapters %}
+{% endif %}
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary"
+  >Back to Home</a
+>
+{% for chapter in chapters %}
 <div class="card mt-3">
   <div class="card-body">
     <h5 class="card-title">{{ chapter.name }}</h5>

@@ -18,6 +18,11 @@
   class="btn btn-primary"
   >Add Quiz</a
 >
+<a
+  href="{{ url_for('main.subject', subject_id=chapter.subjectId) }}"
+  class="btn btn-secondary"
+  >Back to Subject</a
+>
 
 {% endif %} {% for quiz in quizzes %}
 <div class="card mt-3">
